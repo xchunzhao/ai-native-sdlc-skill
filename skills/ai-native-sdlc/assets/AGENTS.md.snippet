@@ -1,0 +1,11 @@
+
+## AI-Native SDLC
+
+This repository follows the three-artifact SDLC flow (intent → spec → plan → build). Before implementing any substantial change, read the spec at `docs/sdlc/README.md` and use the templates in `docs/sdlc/_templates/`.
+
+- **Feature location:** `docs/sdlc/<feature-slug>/{intent,spec,plan}.md`
+- **Gate:** each artifact must be `status: accepted` in its frontmatter before the next one is drafted
+- **Approval:** intent is reviewed by the product owner; spec by the product owner + policy owners for flagged concerns; plan by the engineer (escalating to tech lead / architect for high-risk work)
+- **Audit trail:** the git commit chain on `docs/sdlc/<feature-slug>/` is the decision record
+
+For skip criteria and full details, see `docs/sdlc/README.md`.
