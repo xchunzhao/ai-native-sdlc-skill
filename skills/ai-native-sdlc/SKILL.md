@@ -25,17 +25,20 @@ This skill is about the **three-artifact regime**, its **gates**, and its **appr
 
 ## First time in a project
 
-If `docs/sdlc/README.md` does not exist in the current repo:
+If the project's `AGENTS.md` does not already contain an `## AI-Native SDLC` section, bootstrap it:
 
 1. Run the bootstrap script from the repo root:
    ```
    bash <path-to-this-skill>/scripts/bootstrap.sh
    ```
    (Typical locations: `~/.claude/skills/ai-native-sdlc/scripts/bootstrap.sh` for Claude Code, `~/.codex/skills/ai-native-sdlc/scripts/bootstrap.sh` for Codex, or the equivalent skills directory for your agent.)
-2. It seeds `docs/sdlc/README.md`, `docs/sdlc/_templates/`, and appends a section to `AGENTS.md` so **other agents** (Cursor, Codex, Aider, Windsurf) pick up the same spec.
-3. The user should review the seeded README and commit: `sdlc: bootstrap docs/sdlc structure`.
+2. What it does:
+   - Creates `docs/sdlc/` (empty; feature/incident folders will live here)
+   - Appends an `## AI-Native SDLC` section to `AGENTS.md` (creating it if absent). That section tells every agent working in this repo what to read, what to generate, the gate strategy, and the artifact frontmatter schema.
+3. What it deliberately **does not** do: it does not copy workflow docs or artifact templates into the project. Those live in this skill (single source of truth) and every session reads them from here. When the skill is updated, the project inherits the update automatically — no rebootstrap needed.
+4. The user should review the appended AGENTS.md section (edit anything project-specific) and commit: `sdlc: bootstrap docs/sdlc structure`.
 
-If `docs/sdlc/README.md` already exists, skip bootstrapping and jump straight to the stage the user wants.
+If `## AI-Native SDLC` already exists in `AGENTS.md`, skip bootstrapping and jump straight to the stage the user wants.
 
 ## The three commands
 
@@ -47,11 +50,12 @@ Each stage has a slash command that invokes the corresponding phase of this skil
 
 1. Confirm the slug (kebab-case, matches or will match branch name).
 2. Ensure `docs/sdlc/<slug>/` exists.
-3. Copy `docs/sdlc/_templates/intent.template.md` to `docs/sdlc/<slug>/intent.md`.
-4. Fill sections through conversation with the user — one section at a time, using their words.
-5. Update frontmatter (author, date, `status: draft`).
-6. Suggest commit: `sdlc(<slug>): add intent.md`.
-7. Remind the user: product owner reviews next; **merging = accepting = triggers spec stage**.
+3. Ensure `docs/sdlc/<slug>/` exists.
+4. Read the intent template from this skill's `assets/intent.template.md` and write a filled version to `docs/sdlc/<slug>/intent.md`. **Do not copy the template into the project's `docs/sdlc/`** — the skill is the single source of truth for templates.
+5. Fill sections through conversation with the user — one section at a time, using their words.
+6. Update frontmatter (author, date, `status: draft`).
+7. Suggest commit: `sdlc(<slug>): add intent.md`.
+8. Remind the user: product owner reviews next; **merging = accepting = triggers spec stage**.
 
 Detailed guidance, section-by-section coaching, and failure modes: [`references/intent-guide.md`](references/intent-guide.md).
 
@@ -63,7 +67,7 @@ Detailed guidance, section-by-section coaching, and failure modes: [`references/
 2. Read the accepted intent fully. Open questions become spec obligations.
 3. Load organizational policy skills (security, brand, compliance, UX) — see the guide for where to look.
 4. Explore relevant code (`Grep`, `Read`, `Explore`) so "Integration with existing code" has real file paths.
-5. Copy `docs/sdlc/_templates/spec.template.md` to `docs/sdlc/<slug>/spec.md`.
+5. Read the spec template from this skill's `assets/spec.template.md` and write a filled version to `docs/sdlc/<slug>/spec.md`. **Do not copy the template into the project.**
 6. Draft in one pass, then critique. Every open question from intent must be answered here.
 7. **Flag concerns honestly** in `Areas of concern`. Do not paper over policy conflicts.
 8. Suggest commit: `sdlc(<slug>): add spec.md`.
@@ -80,7 +84,7 @@ Detailed guidance: [`references/spec-guide.md`](references/spec-guide.md).
 3. Enter plan mode. If your agent has a dedicated plan-mode tool (e.g. Claude Code's `EnterPlanMode`), call it — you get a scratchpad and are prevented from writing files until you exit. If not, operate in read-only exploration mode until the plan is ready to write.
 4. Explore the code the spec named. Make sure every file path is real.
 5. Draft the plan by talking to the engineer — propose, listen, refine.
-6. Copy `docs/sdlc/_templates/plan.template.md` to `docs/sdlc/<slug>/plan.md`.
+6. Read the plan template from this skill's `assets/plan.template.md` and write a filled version to `docs/sdlc/<slug>/plan.md`. **Do not copy the template into the project.**
 7. Fill sections. Especially: **Proof** must be specific (which tests, which manual verifications, which rollout gates, which monitoring).
 8. Exit plan mode (Claude Code: `ExitPlanMode`; other agents: their equivalent) when the plan is complete.
 9. Suggest commit: `sdlc(<slug>): add plan.md`.
@@ -119,7 +123,7 @@ Full procedure, evidence requirements, and failure modes: [`references/maintain-
 
 ## When to skip
 
-Not everything needs three artifacts. Skip for typo fixes, dep bumps, docs edits with no policy implication, and reverts. Emergency hotfixes still need retrospective `intent.md` + `spec.md` within one business day. Full skip criteria in `docs/sdlc/README.md`.
+Not everything needs three artifacts. Skip for typo fixes, dep bumps, docs edits with no policy implication, and reverts. Emergency hotfixes still need retrospective `intent.md` + `spec.md` within one business day.
 
 If in doubt, write at least an `intent.md`. It's cheap, and the audit trail is worth more than the fifteen minutes.
 
@@ -136,9 +140,8 @@ You do not need a formal eval harness for this. The point is to catch behavior d
 ## Files in this skill
 
 - `SKILL.md` — this file
-- `assets/project-README.md` — the agent-agnostic spec that gets copied to `docs/sdlc/README.md`
-- `assets/{intent,spec,plan}.template.md` — the templates
-- `assets/AGENTS.md.snippet` — appended to project `AGENTS.md`
+- `assets/{intent,spec,plan}.template.md` — the artifact templates. Agents read from here every session; templates are **never** copied into projects.
+- `assets/AGENTS.md.snippet` — appended by `bootstrap.sh` to project `AGENTS.md`. Tells agents in the project what to read / generate / gate / format.
 - `references/intent-guide.md`, `spec-guide.md`, `plan-guide.md`, `maintain-guide.md` — stage-by-stage deep guidance
 - `references/approval-matrix.md` — who reviews what, when to escalate
-- `scripts/bootstrap.sh` — seeds `docs/sdlc/` structure and `AGENTS.md` into a project
+- `scripts/bootstrap.sh` — one-time, per-project: creates `docs/sdlc/` and appends the AGENTS.md section. Idempotent.

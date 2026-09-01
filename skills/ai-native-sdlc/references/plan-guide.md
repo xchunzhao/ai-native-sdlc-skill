@@ -10,7 +10,7 @@ Read this when the user runs `/plan <feature-slug>`. This stage runs in **plan m
 4. **Enter plan mode.** If your agent has a dedicated plan-mode tool (Claude Code's `EnterPlanMode`, or an equivalent in your agent), call it — this gives you a scratchpad and prevents accidental writes until you explicitly exit. If your agent has no such tool, operate in read-only exploration mode: read files, don't write anything, only produce the plan document at the end.
 5. **Explore the code.** Use `Read`, `Grep`, `Explore` subagents to understand every file the spec's "Integration with existing code" section named. If the spec was vague, this is where you get concrete.
 6. **Draft the plan by talking to the engineer.** Not in one shot. Propose a section, ask if the engineer sees issues, refine. This is the point of plan mode.
-7. **Copy the template into place.** `cp docs/sdlc/_templates/plan.template.md docs/sdlc/<slug>/plan.md`
+7. **Read the plan template from this skill and write to place.** Do not copy the template into the project. The template lives in this skill's `assets/plan.template.md`; load it with your agent's file-read tool, then write the filled version straight to `docs/sdlc/<slug>/plan.md`.
 8. **Write the plan.** Exit plan mode (in Claude Code, `ExitPlanMode`) when the plan is complete.
 9. **Suggest a commit.** `sdlc(<slug>): add plan.md`
 

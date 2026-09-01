@@ -13,7 +13,7 @@ Read this when the user runs `/spec <feature-slug>` or asks to draft a spec. You
    - CLAUDE.md files at repo root and in relevant subdirectories
    If the org has a **security-review**, **frontend-design**, or **compliance** skill, load it now.
 4. **Explore relevant code.** Use `Grep`/`Read`/`Explore` to understand where this hooks in. The "Integration with existing code" section requires actual file paths.
-5. **Copy the template.** `cp docs/sdlc/_templates/spec.template.md docs/sdlc/<slug>/spec.md`
+5. **Read the spec template from this skill.** Do not copy it into the project. The template lives in this skill's `assets/spec.template.md`; use your agent's file-read tool to load it, then write the filled version straight to `docs/sdlc/<slug>/spec.md`.
 6. **Draft in one pass, then critique.** Fill every section from your understanding, then re-read looking for gaps. Especially: does every open question from the intent get answered here?
 7. **Flag concerns honestly in `Areas of concern`.** Do not paper over conflicts. If security says one thing and UX wants another, name both and identify the policy owners.
 8. **Update frontmatter and commit.** `sdlc(<slug>): add spec.md`
@@ -46,7 +46,7 @@ Read this when the user runs `/spec <feature-slug>` or asks to draft a spec. You
 
 - Intent is not `accepted` yet — direct user to fix that first.
 - Intent is missing required sections — refuse to draft on a broken intent; help fix the intent first.
-- The change is genuinely too small for this process (see skip criteria in `docs/sdlc/README.md`).
+- The change is genuinely too small for this process (see "When to skip" in this skill's `SKILL.md`).
 
 ## Common failure modes
 

@@ -6,8 +6,8 @@ Read this when helping a user draft `intent.md`. Your job is to extract a clear 
 
 1. **Confirm the feature slug.** Kebab-case, matches (or will match) the branch name. If the user hasn't picked one, propose 2–3 and let them choose.
 2. **Ensure the folder exists.** `docs/sdlc/<slug>/` — create it if needed.
-3. **Check for stage skip.** If the change fits the "when to skip" list in `docs/sdlc/README.md` (typo, dep bump, docs edit, hotfix), tell the user and stop. Don't push heavyweight process onto trivial changes.
-4. **Copy the template.** `cp docs/sdlc/_templates/intent.template.md docs/sdlc/<slug>/intent.md`
+3. **Check for stage skip.** If the change fits the "When to skip" list in this skill's `SKILL.md` (typo, dep bump, docs edit, hotfix), tell the user and stop. Don't push heavyweight process onto trivial changes.
+4. **Read the intent template from this skill.** Do not copy it into the project's `docs/sdlc/`. The template lives in this skill's `assets/intent.template.md`; use your agent's file-read tool to load it, then write the filled version straight to `docs/sdlc/<slug>/intent.md`. This keeps the skill as the single source of truth — when the template evolves, all projects inherit the change on the next session.
 5. **Fill sections through conversation.** Ask the user one section at a time. Prefer their words over your paraphrase — they know the problem.
 6. **Update frontmatter.** Author, date, `status: draft`.
 7. **Suggest a commit.** `sdlc(<slug>): add intent.md`

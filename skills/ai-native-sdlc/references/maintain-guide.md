@@ -19,7 +19,7 @@ If the user is asking you to hotfix production directly, stop and tell them: eme
 3. **Form a diagnosis.** A single paragraph: what is broken, when it started, and — if you have enough evidence — why. If you cannot determine *why* with the evidence available, say so and list what would tell you.
 4. **Pick a slug.** Format: `incident-<YYYY-MM-DD>-<short-desc>` (e.g. `incident-2026-09-01-refund-500s`). This keeps incidents visually distinct from feature work in `docs/sdlc/`.
 5. **Ensure the folder exists.** `docs/sdlc/<slug>/`.
-6. **Copy the intent template.** `cp docs/sdlc/_templates/intent.template.md docs/sdlc/<slug>/intent.md`.
+6. **Read the intent template from this skill.** Do not copy it into the project. The template lives in this skill's `assets/intent.template.md`; load it with your agent's file-read tool, then write the filled version straight to `docs/sdlc/<slug>/intent.md`.
 7. **Fill sections from the diagnosis** — see coaching below. `Problem` leads with the evidence.
 8. **Update frontmatter.** Author = the diagnosing agent + the on-call handle. `status: draft`.
 9. **Suggest a commit.** `sdlc(<slug>): add intent.md (incident diagnosis)`.

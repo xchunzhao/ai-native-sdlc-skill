@@ -60,7 +60,7 @@ Once installed, the skill activates automatically when you start feature work or
 
 > "We're seeing 5xx spikes on the refund endpoint since this morning's deploy. Help me diagnose."
 
-On first use in a project, the skill scaffolds `docs/sdlc/` (README + templates) and appends a section to `AGENTS.md` so **other agents in the same repo** (Cursor, Aider, Windsurf, and any tool that reads `AGENTS.md`) follow the same workflow.
+On first use in a project, the skill creates an empty `docs/sdlc/` and appends an `## AI-Native SDLC` section to `AGENTS.md`. That section tells every agent in the repo (Cursor, Aider, Windsurf, and any tool that reads `AGENTS.md`) **what to read, what to generate, the gate strategy, and the artifact frontmatter schema**. Workflow rules and artifact templates stay in this skill — the project never carries a copy that could drift.
 
 If you prefer explicit slash commands, Claude Code exposes `/intent <slug>`, `/spec <slug>`, `/plan <slug>`.
 
@@ -77,14 +77,13 @@ skills/ai-native-sdlc/
 │   ├── plan-guide.md
 │   ├── maintain-guide.md    # production signal → intent.md flow
 │   └── approval-matrix.md   # who reviews what, when to escalate
-├── assets/                  # templates copied into target projects
-│   ├── intent.template.md
+├── assets/                  # source of truth for templates and the AGENTS.md snippet
+│   ├── intent.template.md   # read from here every session — NEVER copied into projects
 │   ├── spec.template.md
 │   ├── plan.template.md
-│   ├── AGENTS.md.snippet    # cross-agent trigger, appended to project AGENTS.md
-│   └── project-README.md    # copied as docs/sdlc/README.md
+│   └── AGENTS.md.snippet    # appended to project AGENTS.md by bootstrap.sh
 └── scripts/
-    └── bootstrap.sh         # idempotent scaffold into a target project
+    └── bootstrap.sh         # per-project one-time: mkdir docs/sdlc + append AGENTS.md
 ```
 
 ---
@@ -95,18 +94,15 @@ After the skill's first run (or after invoking `scripts/bootstrap.sh` directly):
 
 ```
 <your-project>/
-├── AGENTS.md                        # appended with SDLC pointer for non-Claude agents
-└── docs/sdlc/
-    ├── README.md                    # agent-agnostic project spec
-    ├── _templates/
-    │   ├── intent.template.md
-    │   ├── spec.template.md
-    │   └── plan.template.md
+├── AGENTS.md                        # appended with the SDLC section (read/generate/gate/format)
+└── docs/sdlc/                       # empty until the first feature or incident
     └── <feature-slug>/              # one folder per feature or incident
         ├── intent.md
         ├── spec.md
         └── plan.md
 ```
+
+**No `README.md` or `_templates/` in the project.** Those live only in the skill (single source of truth) so skill updates propagate on the next session without a rebootstrap.
 
 Incident work uses the slug convention `incident-<YYYY-MM-DD>-<short-desc>` to stay visually distinct from feature slugs.
 
