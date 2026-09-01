@@ -50,12 +50,11 @@ Each stage has a slash command that invokes the corresponding phase of this skil
 
 1. Confirm the slug (kebab-case, matches or will match branch name).
 2. Ensure `docs/sdlc/<slug>/` exists.
-3. Ensure `docs/sdlc/<slug>/` exists.
-4. Read the intent template from this skill's `assets/intent.template.md` and write a filled version to `docs/sdlc/<slug>/intent.md`. **Do not copy the template into the project's `docs/sdlc/`** — the skill is the single source of truth for templates.
-5. Fill sections through conversation with the user — one section at a time, using their words.
-6. Update frontmatter (author, date, `status: draft`).
-7. Suggest commit: `sdlc(<slug>): add intent.md`.
-8. Remind the user: product owner reviews next; **merging = accepting = triggers spec stage**.
+3. Read the intent template from this skill's `assets/intent.template.md` and write a filled version to `docs/sdlc/<slug>/intent.md`. **Do not copy the template into the project's `docs/sdlc/`** — the skill is the single source of truth for templates.
+4. Fill sections through conversation with the user — one section at a time, using their words.
+5. Update frontmatter (author, date, `status: draft`).
+6. Suggest commit: `sdlc(<slug>): add intent.md`.
+7. Remind the user: product owner reviews next; **merging = accepting = triggers spec stage**.
 
 Detailed guidance, section-by-section coaching, and failure modes: [`references/intent-guide.md`](references/intent-guide.md).
 
@@ -129,13 +128,17 @@ If in doubt, write at least an `intent.md`. It's cheap, and the audit trail is w
 
 ## Updating this skill
 
-Changing `SKILL.md`, any `references/*-guide.md`, or the `assets/*.template.md` files changes how every project using this skill will run. Treat those edits like code changes to a library:
+Changing `SKILL.md`, any `references/*-guide.md`, or the `assets/*.template.md` files changes how every project using this skill will run. Treat those edits like code changes to a library.
 
-1. **Before merging the change**, run a small regression by hand: pick 3–5 representative real cases (a feature intent, an incident intent, a spec with policy conflicts, a plan with a migration) and run the affected command against each. Look for behavior drift — has the guide's new wording pushed the agent toward vaguer intents? Does the spec now skip a section it used to fill?
-2. **Note the outcome in the commit message** — "verified against: refund-flow, incident-2026-09-01, migration-tenants". This is your audit trail for the skill itself.
-3. **If a change relaxes a rule** (e.g. removing a required section), be extra careful — the same case set should still produce artifacts you'd accept.
+Before merging any such change, run the regression suite that ships with this skill:
 
-You do not need a formal eval harness for this. The point is to catch behavior drift before it ships to everyone using the skill, and to make the skill's own quality visible in git history.
+> "Run the ai-native-sdlc regression check."
+
+That triggers the procedure in [`evals/REGRESSION.md`](evals/REGRESSION.md): 3 real-shaped cases (feature intent / incident maintain / high-risk migration) get re-run against the modified skill and blind-judged against the frozen baseline in `evals/baseline/`. Verdict comes back in ~5 minutes as REGRESSION / STABLE / IMPROVEMENT per case, with the judge's reasoning quoted for anything that regressed.
+
+Note the verdict in the commit message ("regression check: STABLE" or "IMPROVEMENT on migration-highrisk"). This is the audit trail for the skill itself. If a change relaxes a rule (e.g. removing a required section), the regression check should catch it — that's what it's for.
+
+Skipping the check is fine for typo fixes and comment tweaks. Any semantic change to instructions, templates, or the approval matrix should go through it.
 
 ## Files in this skill
 
@@ -145,3 +148,4 @@ You do not need a formal eval harness for this. The point is to catch behavior d
 - `references/intent-guide.md`, `spec-guide.md`, `plan-guide.md`, `maintain-guide.md` — stage-by-stage deep guidance
 - `references/approval-matrix.md` — who reviews what, when to escalate
 - `scripts/bootstrap.sh` — one-time, per-project: creates `docs/sdlc/` and appends the AGENTS.md section. Idempotent.
+- `evals/suite.json`, `evals/baseline/`, `evals/REGRESSION.md` — regression harness (see [Updating this skill](#updating-this-skill)). Ships with the skill; ephemeral run data lives outside in `~/.claude/skills/ai-native-sdlc-workspace/`.
