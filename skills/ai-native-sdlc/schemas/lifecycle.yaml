@@ -1,0 +1,31 @@
+version: 1
+statuses:
+  draft:
+    transitions: [accepted, rejected]
+  accepted:
+    transitions: [stale, superseded]
+  rejected:
+    transitions: [draft]
+  stale:
+    transitions: [draft, superseded]
+  superseded:
+    transitions: []
+dependencies:
+  spec:
+    requires: intent
+    required_status: accepted
+    ref_field: intent_ref
+  plan:
+    requires: [intent, spec]
+    required_status: accepted
+    ref_fields:
+      intent: intent_ref
+      spec: spec_ref
+invalidation:
+  intent_changed: [spec, plan]
+  spec_changed: [plan]
+  plan_changed: [plan]
+approval:
+  accepted_fields: [accepted_by, accepted_at]
+  human_only: true
+  high_risk_requires_reviewers: true

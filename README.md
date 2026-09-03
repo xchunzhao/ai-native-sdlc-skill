@@ -1,43 +1,67 @@
-# AI-Native SDLC Skill
+# AI-Native SDLC
 
-A reusable agent skill that runs Anthropic's AI-Native SDLC loop — **intent → spec → plan → build → maintain** — with human approval gates at every handoff. The agent goes all the way up to the production gate, and never crosses it.
+A portable Agent Skill for turning substantial product work into an auditable decision chain:
 
-Framework-neutral: works in Claude Code, Codex, and any agent that follows the SKILL.md convention.
+```text
+intent → spec → plan → build handoff
+```
 
-Based on Anthropic's [AI-Native SDLC playbook](https://claude.com/blog/the-ai-native-sdlc-playbook).
+The Skill governs decisions before implementation. It records why the work matters, what must be true, how the code should change, who approved each stage, and which accepted revisions the next stage depends on. Implementation, merge, deployment, and production access remain in the project's normal delivery workflow.
 
----
+Based on Anthropic's [AI-Native SDLC Playbook](https://claude.com/blog/the-ai-native-sdlc-playbook).
 
-## What it does
+## Why use it
 
-Every substantial change flows through three markdown artifacts before code is written:
+Planning documents often drift independently: requirements change while an old implementation plan still looks approved. This Skill makes that failure visible.
 
-| Artifact | Answers |
-|---|---|
-| `intent.md` | Why are we doing this? Who is it for? |
-| `spec.md` | What does "done" look like? What policies constrain it? |
-| `plan.md` | How will the code change? In what order? How do we prove it works? |
+- Three focused artifacts separate product intent, specification, and implementation planning.
+- Human acceptance is explicit through approver and timestamp metadata.
+- Spec and plan pin the accepted upstream Git commits they were reviewed against.
+- `sdlc-check` rejects invalid gates, missing approval evidence, and stale dependencies.
+- High-risk work names policy owners and technical reviewers before implementation.
+- An accepted plan ends in a concrete build handoff instead of an ambiguous “start coding.”
 
-Each artifact is committed to git and gated on human approval (frontmatter `status: accepted`). **The commit chain is the audit trail.**
+## Workflow
 
-When a production signal — an incident, a metric drift, a bug report — starts the conversation instead of a fresh idea, the skill runs a **read-only diagnosis** and turns the diagnosis into an `intent.md` that re-enters the loop. The fix still goes through the normal spec → plan → build flow; the agent never patches production directly.
+```mermaid
+flowchart LR
+    idea[Idea or production signal] --> intent[intent.md]
+    intent -->|human acceptance| spec[spec.md]
+    spec -->|human acceptance| plan[plan.md]
+    plan -->|engineer acceptance| handoff[Build handoff]
+    handoff --> delivery[Project delivery workflow]
 
----
+    intent -. changed .-> stale1[Spec and plan stale]
+    spec -. changed .-> stale2[Plan stale]
+```
+
+| Stage | Artifact | Primary question | Gate |
+|---|---|---|---|
+| Intent | `intent.md` | Why are we doing this, and for whom? | Product or incident owner acceptance |
+| Spec | `spec.md` | What does done mean, and which policies constrain it? | Product owner plus policy reviewers |
+| Plan | `plan.md` | Which code changes, in what order, with what proof? | Engineer; tech lead or architect for high risk |
+| Handoff | Plan section | Who implements, reviews, rolls out, and supplies evidence? | Current accepted revision chain |
+
+Production incidents enter through a read-only diagnosis that creates an incident intent. The Skill does not hotfix or deploy; the accepted plan hands remediation to the team's incident and delivery workflow.
 
 ## Install
 
-Clone this repo, then copy the skill folder into your agent's skills directory.
+The installable unit is [`skills/ai-native-sdlc/`](skills/ai-native-sdlc/), not the repository root.
+
+### Requirements
+
+- Python 3.10 or newer
+- Git for accepted-revision and stale-chain validation
+- Optional POSIX shell for the extensionless command launchers
 
 ### Claude Code
 
-Personal (available in every session):
 ```bash
+# User-wide
 cp -R skills/ai-native-sdlc ~/.claude/skills/
-```
 
-Team-shared, per project (skill ships with the repo, everyone gets it on clone):
-```bash
-cp -R skills/ai-native-sdlc <your-project>/.claude/skills/
+# Project-local
+cp -R skills/ai-native-sdlc <project>/.claude/skills/
 ```
 
 ### Codex
@@ -46,97 +70,102 @@ cp -R skills/ai-native-sdlc <your-project>/.claude/skills/
 cp -R skills/ai-native-sdlc ~/.codex/skills/
 ```
 
-### Other skill-compatible agents
+For another Agent Skills host, copy `skills/ai-native-sdlc/` into that host's Skill directory. The installed layout is self-contained:
 
-Copy `skills/ai-native-sdlc/` into whatever skills directory your agent reads. The SKILL.md format is agent-agnostic.
-
----
-
-## Use it
-
-Once installed, the skill activates automatically when you start feature work or triage a production signal. **You do not need a slash command**:
-
-> "I want to add SSO to the admin dashboard — let's start with the intent."
-
-> "We're seeing 5xx spikes on the refund endpoint since this morning's deploy. Help me diagnose."
-
-On first use in a project, the skill creates an empty `docs/sdlc/` and appends an `## AI-Native SDLC` section to `AGENTS.md`. That section tells every agent in the repo (Cursor, Aider, Windsurf, and any tool that reads `AGENTS.md`) **what to read, what to generate, the gate strategy, and the artifact frontmatter schema**. Workflow rules and artifact templates stay in this skill — the project never carries a copy that could drift.
-
-If you prefer explicit slash commands, Claude Code exposes `/intent <slug>`, `/spec <slug>`, `/plan <slug>`.
-
----
-
-## Structure
-
-```
-skills/ai-native-sdlc/
-├── SKILL.md                 # entrypoint: hard rules, three-command flow, maintain loop
-├── references/              # on-demand deep guides
-│   ├── intent-guide.md
-│   ├── spec-guide.md
-│   ├── plan-guide.md
-│   ├── maintain-guide.md    # production signal → intent.md flow
-│   └── approval-matrix.md   # who reviews what, when to escalate
-├── assets/                  # source of truth for templates and the AGENTS.md snippet
-│   ├── intent.template.md   # read from here every session — NEVER copied into projects
-│   ├── spec.template.md
-│   ├── plan.template.md
-│   └── AGENTS.md.snippet    # appended to project AGENTS.md by bootstrap.sh
+```text
+ai-native-sdlc/
+├── SKILL.md
+├── LICENSE
+├── assets/
+├── references/
+├── schemas/
 └── scripts/
-    └── bootstrap.sh         # per-project one-time: mkdir docs/sdlc + append AGENTS.md
 ```
 
----
+## Use
 
-## What gets created in a target project
+After installation, ask naturally. The agent loads the Skill when the request matches its description; no manual initialization command or host-specific slash command is required.
 
-After the skill's first run (or after invoking `scripts/bootstrap.sh` directly):
+> I want to add SSO to the admin dashboard. Start with the intent.
 
-```
-<your-project>/
-├── AGENTS.md                        # appended with the SDLC section (read/generate/gate/format)
-└── docs/sdlc/                       # empty until the first feature or incident
-    └── <feature-slug>/              # one folder per feature or incident
+> Checkout 5xx errors spiked after the campaign launch. Diagnose this read-only and create the incident intent.
+
+On the first applicable task in a project, the agent runs the bundled bootstrap to create `docs/sdlc/` and install the managed AI-Native SDLC block in `AGENTS.md`. At each gate, the agent runs the bundled checker before proceeding. Reinstalling or updating the Skill does not require the user to remember a separate workflow; the next applicable invocation refreshes the managed block when needed.
+
+The `bootstrap` and `sdlc-check` executables are bundled for deterministic agent use and troubleshooting. They are implementation details of the Skill, not required setup steps for normal use.
+
+## Generated project artifacts
+
+```text
+<project>/
+├── AGENTS.md
+└── docs/sdlc/
+    └── <slug>/
         ├── intent.md
         ├── spec.md
         └── plan.md
 ```
 
-**No `README.md` or `_templates/` in the project.** Those live only in the skill (single source of truth) so skill updates propagate on the next session without a rebootstrap.
+Feature slugs use kebab-case. Incident slugs use `incident-<YYYY-MM-DD>-<short-desc>`.
 
-Incident work uses the slug convention `incident-<YYYY-MM-DD>-<short-desc>` to stay visually distinct from feature slugs.
+Templates remain inside the installed Skill and are read on demand; they are not copied into every project. The project stores only its decisions and a managed pointer to the workflow.
 
----
+## Artifact lifecycle
 
-## When to skip
+Artifacts use these states:
 
-Not everything needs three artifacts. Skip for typo fixes, dep bumps, docs edits with no policy implication, and reverts. **Emergency hotfixes still need a retrospective `intent.md` + `spec.md` within one business day** — the audit trail must reflect reality.
-
-If in doubt, write at least an `intent.md`. It's cheap, and the audit trail is worth more than fifteen minutes.
-
----
-
-## Contributing
-
-Changes to `SKILL.md`, `references/*-guide.md`, or `assets/*.template.md` change how every project using this skill runs. Treat those edits like library changes:
-
-```bash
-./regression          # generate current outputs and blind-compare with the frozen baseline
-./regression --check  # offline suite and baseline integrity check
+```text
+draft → accepted | rejected
+accepted → stale | superseded
+rejected → draft
+stale → draft | superseded
 ```
 
-Exit `0` means STABLE or IMPROVEMENT, `1` means REGRESSION, and `2` means the runner or model backend failed. Reports are written under `~/.cache/ai-native-sdlc-regression/` by default; set `XDG_CACHE_HOME` or pass `--workspace` to relocate them.
+Accepted artifacts retain `accepted_by` and `accepted_at`. A spec records `intent_ref`; a plan records both `intent_ref` and `spec_ref`. A semantic change to accepted content requires another review. Changing intent invalidates spec and plan; changing spec invalidates plan.
 
-See `skills/ai-native-sdlc/evals/REGRESSION.md` for the evaluation contract and baseline-promotion procedure.
+See the installed Skill's [`references/artifact-lifecycle.md`](skills/ai-native-sdlc/references/artifact-lifecycle.md) and [`schemas/`](skills/ai-native-sdlc/schemas/) for the normative contract.
 
-Issues and pull requests welcome.
+## When to use it
 
----
+Use the full chain for substantial features, refactors with product or policy impact, migrations, external contract changes, and structural incident follow-up. Auth, payments, PII, compliance, migrations, and systems with prior post-mortems are high risk.
 
-## Credits
+Skip the full chain for typo fixes, routine dependency bumps, policy-neutral documentation edits, and reverts. Emergency hotfix execution stays in the team's incident workflow and requires retrospective intent and spec within one business day.
 
-Based on Anthropic's [AI-Native SDLC playbook](https://claude.com/blog/the-ai-native-sdlc-playbook).
+## Repository layout
+
+```text
+.
+├── .github/workflows/        # repository CI
+├── scripts/                  # maintainer validation and regression tools
+├── tests/                    # deterministic repository tests
+├── evals/                    # model cases and frozen baselines
+└── skills/ai-native-sdlc/    # installable Skill package
+```
+
+Runtime commands live inside the Skill package. Maintainer tests, model evaluations, and regression tooling remain outside it so copied installations contain no development-only files.
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for package boundaries, required checks, semantic regression, baseline promotion, and the pull-request checklist.
+
+Fast deterministic checks:
+
+```bash
+python3 -m unittest discover -s tests -v
+python3 scripts/validate_package.py
+python3 scripts/regression.py --check
+```
+
+Semantic changes to the Skill, templates, lifecycle, or approval policy also require:
+
+```bash
+python3 scripts/regression.py
+```
+
+## Privacy
+
+The installable Skill contains no telemetry, notification hook, workstation path, account identifier, or host-specific configuration. Runtime scripts make no network requests. Local agent-host hooks are ignored through `**/.github/hooks/` and must never be committed into the Skill package.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE). The installable package carries its own copy at [`skills/ai-native-sdlc/LICENSE`](skills/ai-native-sdlc/LICENSE).

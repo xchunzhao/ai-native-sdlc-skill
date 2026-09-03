@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+dist/
+
+# Local agent-host hooks may contain workstation paths or identities.
+**/.github/hooks/

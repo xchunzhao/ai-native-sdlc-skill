@@ -1,0 +1,78 @@
+{
+  "suite_name": "ai-native-sdlc",
+  "skill_path": "../skills/ai-native-sdlc",
+  "snapshot_files": ["SKILL.md", "schemas/artifact.schema.json", "schemas/lifecycle.yaml", "references/intent-guide.md", "references/spec-guide.md", "references/plan-guide.md", "references/maintain-guide.md", "references/artifact-lifecycle.md", "references/approval-matrix.md", "references/build-handoff.md", "assets/intent.template.md", "assets/spec.template.md", "assets/plan.template.md"],
+  "baseline_iteration": "iteration-1",
+  "cases": [
+    {
+      "id": "feature-intent",
+      "artifact_path": "docs/sdlc/refund-flow-v2/intent.md",
+      "prompt": "ok we're finally doing the refund flow rewrite. can you help me write an intent for it? the slug should be refund-flow-v2.\n\ncontext: right now refunds go through a legacy stripe integration and the CX team keeps complaining that partial refunds break the ledger — the ledger entry gets created for the full amount even when only $20 of a $50 charge was refunded, so month-end reconciliation is a nightmare and finance manually adjusts ~30 entries per month. we also can't refund past 90 days (stripe limit) but customers keep asking. product wants us to move to our own refund ledger with proper partial-refund support and a 12-month window backed by store credit for the 90+ day cases.\n\nthe project is a rails 7 monorepo with a react admin surface. audit trail matters — SOC2 audit is in Q2.",
+      "quality_criteria": "Captures WHY (business/user pain, timing, downstream cost); captures WHO for; scopes the problem without designing the solution; surfaces open questions for spec/plan; does NOT prematurely commit to implementation choices; frontmatter with status: draft.",
+      "baseline_path": "docs/sdlc/refund-flow-v2/intent.md",
+      "context_files": ["SKILL.md", "references/intent-guide.md", "references/approval-matrix.md", "assets/intent.template.md"],
+      "structure": {
+        "required_frontmatter": ["artifact", "feature", "author", "status", "created", "risk", "reviewers"],
+        "frontmatter_equals": {"artifact": "intent", "status": "draft"},
+        "required_headings": ["Problem", "Proposed outcome", "Affected users and systems", "Constraints", "Open questions"],
+        "forbidden_patterns": ["_<[^>]+>_", "^## Author \\+ Status$"]
+      }
+    },
+    {
+      "id": "incident-maintain",
+      "artifact_path": "docs/sdlc/incident-<YYYY-MM-DD>-<slug>/intent.md",
+      "prompt": "we just had a P1. checkout was returning 500s intermittently between 14:02 and 14:47 UTC today (2026-09-01). Sentry shows the traceback pointing at CouponService#apply — nil error on `code.expires_at`. datadog shows a spike in latency on the coupons-db read replica starting 13:58 UTC, right after the marketing team's flash-sale campaign went live at 13:55.\n\nrollback: the ops team disabled the flash-sale coupon at 14:47 and errors stopped. we haven't deployed anything since yesterday morning.\n\ncan you diagnose read-only and turn this into whatever the playbook wants us to produce so we can actually fix this through the normal review flow? don't touch code — I want the audit trail intact.",
+      "quality_criteria": "Priority order: (1) read-only diagnosis, no code touched; (2) audit trail preserved; (3) produces the artifact needed to re-enter the fix through the normal review flow; (4) captures evidence and hypothesis clearly.",
+      "baseline_path": "docs/sdlc/incident-2026-09-01-checkout-500s/intent.md",
+      "context_files": ["SKILL.md", "references/maintain-guide.md", "references/approval-matrix.md", "assets/intent.template.md"],
+      "structure": {
+        "required_frontmatter": ["artifact", "feature", "author", "status", "created", "risk", "reviewers"],
+        "frontmatter_equals": {"artifact": "intent", "status": "draft"},
+        "required_headings": ["Problem", "Proposed outcome", "Affected users and systems", "Constraints", "Open questions"],
+        "forbidden_patterns": ["_<[^>]+>_", "^## Author \\+ Status$"]
+      }
+    },
+    {
+      "id": "migration-highrisk",
+      "artifact_path": "docs/sdlc/<migration-slug>/intent.md",
+      "prompt": "we're doing a schema migration on the tenants table next sprint — need to split `tenants.settings` (currently a JSONB blob) into a proper `tenant_settings` table with a foreign key, because we now have 40+ settings keys and querying by any of them requires JSONB GIN scans that are killing p99 on the admin dashboard.\n\nthe complication: `tenants.settings` contains a `pii_export_policy` key that the compliance team owns (they audit it quarterly), a `billing_defaults` key that finance owns, and a `feature_flags` sub-object that pretty much every team writes to.\n\nI want to run this through the full three-artifact regime because it's touching PII surface, migrations, and cross-team ownership. start with the intent — I'll come back for spec once product signs off.",
+      "quality_criteria": "(1) Intent-stage discipline — captures why, does NOT design the migration; (2) names policy owners (compliance, finance) as reviewers up front; (3) surfaces high-risk nature (PII + migration → escalation to tech lead / architect per approval matrix); (4) lists spec-stage open questions rather than answering them.",
+      "baseline_path": "docs/sdlc/migration-tenant-settings-split/intent.md",
+      "context_files": ["SKILL.md", "references/intent-guide.md", "references/approval-matrix.md", "assets/intent.template.md"],
+      "structure": {
+        "required_frontmatter": ["artifact", "feature", "author", "status", "created", "risk", "reviewers"],
+        "frontmatter_equals": {"artifact": "intent", "status": "draft"},
+        "required_headings": ["Problem", "Proposed outcome", "Affected users and systems", "Constraints", "Open questions"],
+        "forbidden_patterns": ["_<[^>]+>_", "^## Author \\+ Status$"]
+      }
+    },
+    {
+      "id": "feature-spec",
+      "artifact_path": "docs/sdlc/account-recovery-passkeys/spec.md",
+      "prompt": "Draft spec.md only for feature account-recovery-passkeys. The accepted intent at commit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa says: users who lose access need recovery without weakening passkey security; recovery must resist account enumeration, token replay, and recovery-email compromise; users without a passkey-capable device are out of scope for this change. Existing code has one recovery controller, token store, passkey registration service, and security notification channel, but no repository security-policy document was provided. The change touches auth and PII, so it is high risk. Use date 2026-09-03 and author eval-run. Do not claim compliance with a policy you could not inspect.",
+      "quality_criteria": "Produces a concrete spec without implementation sequencing; pins the accepted intent; treats auth/PII as high risk; defines functional and non-functional requirements; makes missing security-policy evidence visible; assigns concerns to owners; keeps device-less fallback out of scope.",
+      "baseline_path": "docs/sdlc/account-recovery-passkeys/spec.md",
+      "context_files": ["SKILL.md", "references/spec-guide.md", "references/artifact-lifecycle.md", "references/approval-matrix.md", "assets/spec.template.md"],
+      "structure": {
+        "required_frontmatter": ["artifact", "feature", "author", "status", "created", "intent_ref", "risk", "reviewers"],
+        "frontmatter_equals": {"artifact": "spec", "status": "draft", "intent_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "risk": "high"},
+        "required_headings": ["Requirements & design spec", "Integration with existing code", "Policy compliance", "Areas of concern"],
+        "forbidden_patterns": ["_<[^>]+>_", "^## Author \\+ Status$"]
+      }
+    },
+    {
+      "id": "feature-plan",
+      "artifact_path": "docs/sdlc/account-recovery-passkeys/plan.md",
+      "prompt": "Draft plan.md only for feature account-recovery-passkeys. Accepted intent commit is aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa and accepted spec commit is bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb. The accepted spec defines FR-1 recovery with verified email plus a passkey challenge, FR-2 indistinguishable known/unknown initiation, FR-3 revoke tokens and notify after success, FR-4 defined expiry/replay/rate-limit errors, SEC-1 hashed single-use 15-minute tokens, and NFR-1 WCAG 2.2 AA. Existing integration points are src/auth/recovery-controller.ts, src/auth/recovery-token-store.ts, src/auth/passkey-service.ts, their tests, and e2e/account-recovery.spec.ts. This is high-risk auth/PII work. Use date 2026-09-03 and author eval-run. Include staged rollout, rollback, monitoring, requirement traceability, owners, reviewers, interface contracts, and completion evidence.",
+      "quality_criteria": "Produces an executable high-risk plan that pins both accepted revisions, names real supplied paths and ordered dependencies, covers race and account-takeover risks, maps every requirement to proof, and ends in a complete build handoff without performing implementation.",
+      "baseline_path": "docs/sdlc/account-recovery-passkeys/plan.md",
+      "context_files": ["SKILL.md", "references/plan-guide.md", "references/artifact-lifecycle.md", "references/approval-matrix.md", "references/build-handoff.md", "assets/plan.template.md"],
+      "structure": {
+        "required_frontmatter": ["artifact", "feature", "author", "status", "created", "intent_ref", "spec_ref", "risk", "reviewers"],
+        "frontmatter_equals": {"artifact": "plan", "status": "draft", "intent_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "spec_ref": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "risk": "high"},
+        "required_headings": ["Files that change", "Order of work", "Risks", "Proof", "Requirement traceability", "Build handoff"],
+        "forbidden_patterns": ["_<[^>]+>_", "^## Author \\+ Status$"]
+      }
+    }
+  ]
+}

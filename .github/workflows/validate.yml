@@ -1,0 +1,31 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run deterministic tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Validate frozen regression baselines
+        run: python3 scripts/regression.py --check
+      - name: Validate installable skill package
+        run: python3 scripts/validate_package.py
+      - name: Smoke-test artifact checker
+        run: skills/ai-native-sdlc/scripts/sdlc-check tests/fixtures/valid --no-git
+      - name: Confirm invalid approval evidence is rejected
+        run: |
+          if skills/ai-native-sdlc/scripts/sdlc-check tests/fixtures/invalid --no-git; then
+            echo "invalid fixture unexpectedly passed" >&2
+            exit 1
+          fi

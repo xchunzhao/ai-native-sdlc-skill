@@ -1,18 +1,16 @@
 # Plan Guide — writing `plan.md` well
 
-Read this when the user runs `/plan <feature-slug>`. This stage runs in **plan mode** — a conversation between Claude and the engineer that ends with an accepted implementation plan.
+Read this when the user asks to draft `plan.md`. This stage runs in plan mode: a conversation with the engineer that ends in a reviewable implementation plan and, after human acceptance, a build handoff.
 
 ## Order of operations
 
-1. **Verify the gate.** Open `docs/sdlc/<slug>/spec.md` and check `status: accepted`. If not, stop and tell the user "spec is `draft`; needs product owner acceptance first."
-2. **Read the spec fully.** Every section, especially "Areas of concern" — unresolved concerns become plan risks.
-3. **Also re-read intent.md.** You want the *why* fresh in your head while planning the *how*.
-4. **Enter plan mode.** If your agent has a dedicated plan-mode tool (Claude Code's `EnterPlanMode`, or an equivalent in your agent), call it — this gives you a scratchpad and prevents accidental writes until you explicitly exit. If your agent has no such tool, operate in read-only exploration mode: read files, don't write anything, only produce the plan document at the end.
-5. **Explore the code.** Use `Read`, `Grep`, `Explore` subagents to understand every file the spec's "Integration with existing code" section named. If the spec was vague, this is where you get concrete.
-6. **Draft the plan by talking to the engineer.** Not in one shot. Propose a section, ask if the engineer sees issues, refine. This is the point of plan mode.
-7. **Read the plan template from this skill and write to place.** Do not copy the template into the project. The template lives in this skill's `assets/plan.template.md`; load it with your agent's file-read tool, then write the filled version straight to `docs/sdlc/<slug>/plan.md`.
-8. **Write the plan.** Exit plan mode (in Claude Code, `ExitPlanMode`) when the plan is complete.
-9. **Suggest a commit.** `sdlc(<slug>): add plan.md`
+1. **Verify the gate.** Run `<skill-dir>/scripts/sdlc-check docs/sdlc/<slug>`, verify spec and intent are accepted and current, and record their full commits as `intent_ref` and `spec_ref`.
+2. **Read spec and intent fully.** Unresolved concerns become plan risks; keep the intended outcome fresh while planning implementation.
+3. **Enter plan mode.** Use the host's plan mode when available; otherwise remain read-only until writing the final plan.
+4. **Explore the code.** Read every integration point named by the spec and verify every planned path.
+5. **Draft with the engineer.** Propose, listen, and refine rather than presenting a one-shot plan.
+6. **Write the plan from the skill template.** Include requirement traceability and complete build-handoff ownership; do not copy the template into the project.
+7. **Commit the draft.** Suggest `sdlc(<slug>): add plan.md`.
 
 ## Section-by-section guidance
 
@@ -59,8 +57,9 @@ Read this when the user runs `/plan <feature-slug>`. This stage runs in **plan m
 
 ## When to stop and hand off
 
-- All sections filled with concrete content
-- Engineer has reviewed and agrees with the sequence, risks, and proof approach
-- Frontmatter complete
-- File committed
-- Remind the user: **engineer accepts (marks `status: accepted`); high-risk plans need tech lead / architect signoff first; once accepted, implementation begins.**
+- All sections contain concrete content
+- Every accepted spec requirement maps to an implementation step and proof
+- Owners, required reviewers, and tracking item are named
+- `intent_ref` and `spec_ref` match the current accepted commits
+- The draft is committed and `<skill-dir>/scripts/sdlc-check docs/sdlc/<slug>` succeeds
+- Engineer acceptance records `accepted_by` and `accepted_at`; high-risk plans obtain tech lead or architect signoff before build handoff.
