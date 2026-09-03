@@ -3,7 +3,7 @@ artifact: intent
 feature: incident-2026-09-01-checkout-500s
 author: eval-run
 status: draft
-date: 2026-09-01
+created: 2026-09-01
 ---
 
 # Intent — Checkout 500s during flash-sale coupon campaign (P1, 2026-09-01)

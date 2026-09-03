@@ -130,13 +130,15 @@ If in doubt, write at least an `intent.md`. It's cheap, and the audit trail is w
 
 Changing `SKILL.md`, any `references/*-guide.md`, or the `assets/*.template.md` files changes how every project using this skill will run. Treat those edits like code changes to a library.
 
-Before merging any such change, run the regression suite that ships with this skill:
+Before merging any semantic change, run the executable regression suite from the repository root:
 
-> "Run the ai-native-sdlc regression check."
+```bash
+./regression
+```
 
-That triggers the procedure in [`evals/REGRESSION.md`](evals/REGRESSION.md): 3 real-shaped cases (feature intent / incident maintain / high-risk migration) get re-run against the modified skill and blind-judged against the frozen baseline in `evals/baseline/`. Verdict comes back in ~5 minutes as REGRESSION / STABLE / IMPROVEMENT per case, with the judge's reasoning quoted for anything that regressed.
+The runner snapshots the current skill, executes the frozen cases from [`evals/suite.json`](evals/suite.json), rejects malformed artifacts with deterministic structural checks, and blind-compares valid outputs with [`evals/baseline/`](evals/baseline/). It writes `report.md` and `report.json` under the user cache directory. Exit `0` means STABLE or IMPROVEMENT, exit `1` means REGRESSION, and exit `2` means the evaluation infrastructure failed. Use `./regression --check` for an offline suite/baseline integrity check.
 
-Note the verdict in the commit message ("regression check: STABLE" or "IMPROVEMENT on migration-highrisk"). This is the audit trail for the skill itself. If a change relaxes a rule (e.g. removing a required section), the regression check should catch it — that's what it's for.
+Note the verdict in the commit message (`regression check: STABLE` or `IMPROVEMENT on migration-highrisk`). This is the audit trail for the skill itself. If a change relaxes a rule, the structural checks or blind comparison should catch it.
 
 Skipping the check is fine for typo fixes and comment tweaks. Any semantic change to instructions, templates, or the approval matrix should go through it.
 
@@ -148,4 +150,5 @@ Skipping the check is fine for typo fixes and comment tweaks. Any semantic chang
 - `references/intent-guide.md`, `spec-guide.md`, `plan-guide.md`, `maintain-guide.md` — stage-by-stage deep guidance
 - `references/approval-matrix.md` — who reviews what, when to escalate
 - `scripts/bootstrap.sh` — one-time, per-project: creates `docs/sdlc/` and appends the AGENTS.md section. Idempotent.
-- `evals/suite.json`, `evals/baseline/`, `evals/REGRESSION.md` — regression harness (see [Updating this skill](#updating-this-skill)). Ships with the skill; ephemeral run data lives outside in `~/.claude/skills/ai-native-sdlc-workspace/`.
+- `scripts/regression.py` — executable regression orchestrator used by the repository-root `./regression` command.
+- `evals/suite.json`, `evals/baseline/`, `evals/REGRESSION.md` — portable regression contract and frozen comparison baseline; run artifacts live under the user cache directory.

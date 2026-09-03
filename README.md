@@ -120,10 +120,14 @@ If in doubt, write at least an `intent.md`. It's cheap, and the audit trail is w
 
 Changes to `SKILL.md`, `references/*-guide.md`, or `assets/*.template.md` change how every project using this skill runs. Treat those edits like library changes:
 
-1. Before merging, run a small regression by hand: pick 3–5 representative real cases (feature intent, incident intent, spec with policy conflicts, plan with a migration) and verify the affected command still behaves as intended.
-2. Note the verified cases in the commit message.
+```bash
+./regression          # generate current outputs and blind-compare with the frozen baseline
+./regression --check  # offline suite and baseline integrity check
+```
 
-See `skills/ai-native-sdlc/SKILL.md` (`## Updating this skill`) for the full rationale.
+Exit `0` means STABLE or IMPROVEMENT, `1` means REGRESSION, and `2` means the runner or model backend failed. Reports are written under `~/.cache/ai-native-sdlc-regression/` by default; set `XDG_CACHE_HOME` or pass `--workspace` to relocate them.
+
+See `skills/ai-native-sdlc/evals/REGRESSION.md` for the evaluation contract and baseline-promotion procedure.
 
 Issues and pull requests welcome.
 
