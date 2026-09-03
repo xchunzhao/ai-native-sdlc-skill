@@ -4,6 +4,10 @@ feature: <feature-slug>
 author: <your-name-or-handle>
 status: draft
 created: <YYYY-MM-DD>
+risk: <low|medium|high>
+reviewers: []
+accepted_by:
+accepted_at:
 ---
 
 # Intent — <one-line feature name>
@@ -30,8 +34,3 @@ _What you don't know yet. Frame each as an actual question. The `spec.md` stage 
 
 - _Question 1_
 - _Question 2_
-
-## Author + Status
-
-- **Author:** _name / handle_
-- **Status:** `draft` — flip to `accepted` when the product owner merges this artifact

@@ -4,8 +4,12 @@ feature: <feature-slug>
 author: <engineer-name>
 status: draft
 created: <YYYY-MM-DD>
-intent: ./intent.md
-spec: ./spec.md
+intent_ref: <accepted-intent-commit-sha>
+spec_ref: <accepted-spec-commit-sha>
+risk: <low|medium|high>
+reviewers: []
+accepted_by:
+accepted_at:
 ---
 
 # Plan — <feature name>
@@ -45,7 +49,23 @@ _How we'll verify the change is correct. Not just "add tests" — name the speci
 - _Monitoring / alerts that must exist before this is considered done_
 - _How we'd detect and roll back a bad deploy_
 
-## Author + Status
+## Requirement traceability
 
-- **Author:** _engineer name_
-- **Status:** `draft` — flip to `accepted` when the engineer accepts this plan (with tech lead / architect signoff on any high-risk items)
+| Requirement | Implementation step | Proof |
+|---|---|---|
+| `<requirement-id>` | <ordered step> | <specific automated or manual evidence> |
+
+Every requirement in the accepted spec must map to implementation work and proof. A work item without a requirement is scope expansion; a requirement without proof is not ready for handoff.
+
+## Build handoff
+
+- **Tracking issue:** <issue or work-item URL>
+- **Implementation owner:** <name or role>
+- **Required reviewers:** <names or roles>
+- **Parallel work groups and interface contracts:** <groups, dependencies, and stable boundaries>
+- **Proof obligations:** <tests, smoke checks, rollout gates, and monitoring evidence>
+- **Rollout owner:** <name or role>
+- **Deployment owner:** <name or role>
+- **Completion evidence:** <what the implementation workflow must report>
+
+_Handoff is valid only while this plan and its referenced intent/spec revisions remain current. See `references/build-handoff.md`._

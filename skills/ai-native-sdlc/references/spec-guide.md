@@ -1,10 +1,10 @@
 # Spec Guide — writing `spec.md` well
 
-Read this when the user runs `/spec <feature-slug>` or asks to draft a spec. Your job is to translate the accepted `intent.md` into a design that reflects the organization's policies. **The product owner does not draft this — you do.**
+Read this when the user asks to draft `spec.md`. Translate the accepted `intent.md` into a design that reflects organizational policies. The product owner reviews the result; the agent drafts it.
 
 ## Order of operations
 
-1. **Verify the gate.** Open `docs/sdlc/<slug>/intent.md` and check `status: accepted` in frontmatter. If not, stop and tell the user "intent is still `draft`; the product owner needs to merge it first."
+1. **Verify the gate.** Run `<skill-dir>/scripts/sdlc-check docs/sdlc/<slug>`, verify intent is accepted and current, then record its full accepted commit as `intent_ref`. If the check fails, stop and resolve the lifecycle error.
 2. **Read the intent fully.** Every section. Look for `Open questions` — those are things the spec must answer.
 3. **Load organizational policy skills.** Look for skills, agent configs, or repo docs that encode brand / security / compliance / UX rules. Common places:
    - Your agent's personal skills directory (e.g. `~/.claude/skills/` for Claude Code, `~/.codex/skills/` for Codex) for skills covering these areas
@@ -16,7 +16,7 @@ Read this when the user runs `/spec <feature-slug>` or asks to draft a spec. You
 5. **Read the spec template from this skill.** Do not copy it into the project. The template lives in this skill's `assets/spec.template.md`; use your agent's file-read tool to load it, then write the filled version straight to `docs/sdlc/<slug>/spec.md`.
 6. **Draft in one pass, then critique.** Fill every section from your understanding, then re-read looking for gaps. Especially: does every open question from the intent get answered here?
 7. **Flag concerns honestly in `Areas of concern`.** Do not paper over conflicts. If security says one thing and UX wants another, name both and identify the policy owners.
-8. **Update frontmatter and commit.** `sdlc(<slug>): add spec.md`
+8. **Set frontmatter and commit.** Preserve `intent_ref`, classify risk, name reviewers, leave acceptance fields empty, and suggest `sdlc(<slug>): add spec.md`.
 
 ## Section-by-section guidance
 
@@ -57,8 +57,8 @@ Read this when the user runs `/spec <feature-slug>` or asks to draft a spec. You
 
 ## When to stop and hand off
 
-- All sections filled, no italic stub prompts remaining
-- Frontmatter complete
-- Concerns section has real content (even "no concerns identified" — but be sure)
-- User has committed the file
-- Remind the user: **product owner reviews next; flagged concerns get dispatched to policy owners; accepting the spec triggers plan mode.**
+- All sections filled, no template prompts remaining
+- Every intent open question is resolved or owned in `Areas of concern`
+- Frontmatter includes the current accepted `intent_ref`, risk, and reviewers
+- The draft is committed and `<skill-dir>/scripts/sdlc-check docs/sdlc/<slug>` succeeds
+- Product owner reviews next; policy owners resolve flagged concerns; acceptance evidence unlocks plan.

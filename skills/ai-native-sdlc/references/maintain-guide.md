@@ -1,8 +1,8 @@
 # Maintain Guide — writing `intent.md` from a production signal
 
-Read this when a production signal — an incident, a metric breach, a bug report, a user complaint — is what starts the conversation, not a fresh product idea. Your job is to **diagnose** and turn the diagnosis into an `intent.md` that re-enters the workflow. **You do not fix the code, deploy, or cross any review gate.** The loop is: diagnosis → intent.md → spec.md → plan.md → build → deploy — same gates as everything else.
+Read this when a production signal — incident, metric breach, bug report, or user complaint — starts the conversation. Diagnose it and turn the evidence into an `intent.md`; do not fix code, deploy, or cross a review gate. The governed path is diagnosis → intent → spec → plan → build handoff, followed by the team's external implementation and deployment workflow.
 
-The point of this guide: the agent can go all the way up to the production gate, but never crosses it. Diagnosis is agent work; the fix goes through the normal loop.
+The guide ends at a reviewed build handoff. Diagnosis is agent work; implementation and deployment remain in the team's normal incident and delivery workflows.
 
 ## When this applies
 
@@ -21,9 +21,9 @@ If the user is asking you to hotfix production directly, stop and tell them: eme
 5. **Ensure the folder exists.** `docs/sdlc/<slug>/`.
 6. **Read the intent template from this skill.** Do not copy it into the project. The template lives in this skill's `assets/intent.template.md`; load it with your agent's file-read tool, then write the filled version straight to `docs/sdlc/<slug>/intent.md`.
 7. **Fill sections from the diagnosis** — see coaching below. `Problem` leads with the evidence.
-8. **Update frontmatter.** Author = the diagnosing agent + the on-call handle. `status: draft`.
+8. **Set frontmatter.** Author = diagnosing agent + incident owner; classify risk, name reviewers, set `status: draft`, and leave acceptance fields empty.
 9. **Suggest a commit.** `sdlc(<slug>): add intent.md (incident diagnosis)`.
-10. **Hand off.** Remind the user: this intent enters the same review loop as any other. The incident owner (usually tech lead or on-call) accepts; then spec drafts, then plan drafts, then code changes go through PR review. **The stages are not skipped because it's an incident.**
+10. **Hand off.** The incident owner accepts with `accepted_by` and `accepted_at`; then spec, plan, and external implementation follow the same gates.
 
 ## Section-by-section coaching
 
@@ -52,9 +52,10 @@ If the user is asking you to hotfix production directly, stop and tell them: eme
 - If root cause is uncertain, that's an open question — "is this caused by the deploy at 14:15 or the config change at 14:18?"
 - Good open question: "does the retry belong in the client SDK or the service?" — it's a design decision the spec must resolve.
 
-### Author + Status
-- Author: diagnosing agent + on-call handle.
-- Status stays `draft` until the incident owner accepts. Never mark `accepted` yourself.
+### Approval metadata
+- Author names the diagnosing agent and incident owner.
+- Production incidents are not silently low risk; classify them against `approval-matrix.md` and name additional reviewers when high risk.
+- Status remains `draft` until the incident owner records acceptance evidence.
 
 ## Common failure modes
 

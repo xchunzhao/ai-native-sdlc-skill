@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-native-sdlc/artifact.schema.json",
+  "title": "AI-Native SDLC artifact frontmatter",
+  "type": "object",
+  "required": ["artifact", "feature", "author", "status", "created", "risk", "reviewers"],
+  "properties": {
+    "artifact": {"enum": ["intent", "spec", "plan"]},
+    "feature": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "author": {"type": "string", "minLength": 1},
+    "status": {"enum": ["draft", "accepted", "rejected", "stale", "superseded"]},
+    "created": {"type": "string", "format": "date"},
+    "risk": {"enum": ["low", "medium", "high"]},
+    "reviewers": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "intent_ref": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "spec_ref": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "accepted_by": {"type": ["string", "null"], "minLength": 1},
+    "accepted_at": {"type": ["string", "null"], "format": "date-time"},
+    "superseded_by": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"artifact": {"const": "spec"}}},
+      "then": {"required": ["intent_ref"]}
+    },
+    {
+      "if": {"properties": {"artifact": {"const": "plan"}}},
+      "then": {"required": ["intent_ref", "spec_ref"]}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["accepted", "stale", "superseded"]}}},
+      "then": {"required": ["accepted_by", "accepted_at"], "properties": {"accepted_by": {"type": "string", "minLength": 1}, "accepted_at": {"type": "string", "format": "date-time"}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "superseded"}}},
+      "then": {"required": ["superseded_by"]}
+    },
+    {
+      "if": {"properties": {"risk": {"const": "high"}}},
+      "then": {"properties": {"reviewers": {"minItems": 1}}}
+    }
+  ],
+  "additionalProperties": false
+}

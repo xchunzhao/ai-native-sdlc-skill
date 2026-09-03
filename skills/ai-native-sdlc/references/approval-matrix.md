@@ -10,6 +10,8 @@ Read this when you need to decide who reviews an artifact or whether to escalate
 | `spec.md` | Agent (loading org skills) | Product owner | Policy owner per flagged concern | Tech lead if any high-risk area is touched |
 | `plan.md` | Agent in plan mode + engineer | Engineer | — | Tech lead / architect if any high-risk area is touched |
 
+Acceptance is evidence, not only a status label. The human reviewer records `accepted_by` and `accepted_at`; high-risk artifacts name all additional reviewers in `reviewers`. A semantic edit after acceptance resets the artifact to `draft` and requires review again.
+
 ## What counts as "high-risk"
 
 Escalate when the work touches any of these:

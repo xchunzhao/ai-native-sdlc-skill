@@ -4,7 +4,11 @@ feature: <feature-slug>
 author: <agent-name-or-handle>
 status: draft
 created: <YYYY-MM-DD>
-intent: ./intent.md
+intent_ref: <accepted-intent-commit-sha>
+risk: <low|medium|high>
+reviewers: []
+accepted_by:
+accepted_at:
 ---
 
 # Spec — <feature name>
@@ -58,8 +62,3 @@ _The most important section. Call out ambiguities, unresolved trade-offs, and �
 
 - _Concern 1 (owner: <role>) — description_
 - _Concern 2 (owner: <role>) — description_
-
-## Author + Status
-
-- **Author:** _agent name / handle_
-- **Status:** `draft` — flip to `accepted` when the product owner accepts this artifact (with any flagged concerns resolved)

@@ -9,7 +9,7 @@ Read this when helping a user draft `intent.md`. Your job is to extract a clear 
 3. **Check for stage skip.** If the change fits the "When to skip" list in this skill's `SKILL.md` (typo, dep bump, docs edit, hotfix), tell the user and stop. Don't push heavyweight process onto trivial changes.
 4. **Read the intent template from this skill.** Do not copy it into the project's `docs/sdlc/`. The template lives in this skill's `assets/intent.template.md`; use your agent's file-read tool to load it, then write the filled version straight to `docs/sdlc/<slug>/intent.md`. This keeps the skill as the single source of truth — when the template evolves, all projects inherit the change on the next session.
 5. **Fill sections through conversation.** Ask the user one section at a time. Prefer their words over your paraphrase — they know the problem.
-6. **Update frontmatter.** Author, date, `status: draft`.
+6. **Set frontmatter.** Author, date, risk, reviewers, `status: draft`; leave `accepted_by` and `accepted_at` empty.
 7. **Suggest a commit.** `sdlc(<slug>): add intent.md`
 
 ## Section-by-section coaching
@@ -37,9 +37,10 @@ Read this when helping a user draft `intent.md`. Your job is to extract a clear 
 - Bad open question: "should we build this?" (that's what the intent itself is asking)
 - Good open question: "do refunds under $50 need managerial approval, or is that a per-tenant setting?"
 
-### Author + Status
-- Author = the initiator. If a scanning/monitoring agent drafted this, note the agent + the human it's for.
-- Status starts `draft`. Never mark `accepted` yourself — that's the product owner's action, expressed by merging.
+### Approval metadata
+- Author is the initiator. If a monitoring agent drafted this, name the agent and the human incident owner.
+- Risk follows `approval-matrix.md`; high-risk work names additional reviewers from the start.
+- Status starts `draft`. A human product owner records `accepted_by` and `accepted_at` in the acceptance commit; never accept your own artifact.
 
 ## Common failure modes
 
@@ -50,7 +51,7 @@ Read this when helping a user draft `intent.md`. Your job is to extract a clear 
 
 ## When to stop and hand off
 
-- All required sections filled with real content (not `_italic stub prompts_`)
-- Frontmatter complete
-- User has committed the file
-- Remind the user: **product owner reviews next; merging the PR = accepting = triggers spec stage.**
+- All required sections contain real content, with no template prompts remaining
+- Frontmatter passes `<skill-dir>/scripts/sdlc-check` structural validation
+- The draft is committed
+- Remind the user: the product owner reviews next; acceptance evidence and the accepted commit unlock spec.
